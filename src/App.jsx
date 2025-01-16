@@ -6,9 +6,30 @@ import "./App.css";
 
 const App = () => {
   const [clients, setClients] = useState([]);
+  const [editingClient, setEditingClient] = useState(null);
 
   const addClient = (newClient) => {
-    setClients([...clients, newClient]);
+    if (editingClient) {
+      // Atualiza o cliente em edição
+      setClients((prevClients) =>
+        prevClients.map((client, index) =>
+          index === editingClient.index ? newClient : client
+        )
+      );
+      setEditingClient(null);
+    } else {
+      // Adiciona um novo cliente
+      setClients([...clients, newClient]);
+    }
+  };
+
+  const deleteClient = (index) => {
+    setClients(clients.filter((_, i) => i !== index));
+  };
+
+  const editClient = (index) => {
+    const clientToEdit = clients[index];
+    setEditingClient({ ...clientToEdit, index });
   };
 
   return (
@@ -19,8 +40,14 @@ const App = () => {
           <Link to="/clients">Lista de Clientes</Link>
         </nav>
         <Routes>
-          <Route path="/" element={<CreateClient onAddClient={addClient} />} />
-          <Route path="/clients" element={<ClientListPage clients={clients} />} />
+          <Route
+            path="/"
+            element={<CreateClient onAddClient={addClient} editingClient={editingClient} />}
+          />
+          <Route
+            path="/clients"
+            element={<ClientListPage clients={clients} onDelete={deleteClient} onEdit={editClient} />}
+          />
         </Routes>
       </div>
     </Router>
